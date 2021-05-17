@@ -39,8 +39,37 @@ class App extends Component {
     //Add first account the the state
 
     //Get network ID
+    const networkId = await web3.eth.net.getId()
     //Get network data
+    const networkData = DVideo.networks[networkId]
+  
     //Check if net data exists, then
+    if (networkData) {
+      const dvideo = new web3.eth.Contract(DVideo.abi, networkData.address)
+      this.setState({dvideo})
+
+      const videoCount = await dvideo.methods.videoCount().call()
+      this.setState({
+        videoCount
+      })
+
+      for (var i = videoCount; i >= 1; i--) {
+        const video = await dvideo.methods.videos(i).call()
+        this.setState({
+          videos: [...this.state.videos, video]
+        })
+
+      }
+
+      const latest = await dvideo.methods.videos(videoCount).call()
+      this.setState({
+        currentHash: latest.hash,
+        currentTitle: latest.title
+      })
+      this.setState({loading: false})
+    } else {
+      window.alert('DVideo contract has deployed to detected network.')
+    }
       //Assign dvideo contract to a variable
       //Add dvideo to the state
 
@@ -58,11 +87,34 @@ class App extends Component {
 
   //Get video
   captureFile = event => {
+    event.preventDefault()
+    const file = event.target.files[0]
+    const reader = new window.FileReader()
+    reader.readAsArrayBuffer(file)
 
+    reader.onloadend = () => {
+      this.setState({buffer: Buffer(reader.result)})
+      console.log('buffer', this.state.buffer)
+    }
   }
 
   //Upload video
   uploadVideo = title => {
+    console.log("submitting to ipfs")
+
+    ipfs.add(this.state.buffer, (error, result) => {
+      console.log('ipfs result', result)
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      this.setState({loading: true})
+      this.state.dvideo.methods.uploadVideo(result[0].hash, title).send({from: this.state.account}).on('transactionHash', (hash) => {
+        this.setState({loading: false})
+     
+      })
+    })
 
   }
 
@@ -75,8 +127,12 @@ class App extends Component {
     super(props)
     this.state = {
       loading: false,
-      account: ''
-      //set states
+      account: '',
+      dvideo: null,
+      videos: [],
+      loading: true,
+      currentHash: null,
+      curentTitle: null
     }
 
     //Bind functions
@@ -91,7 +147,10 @@ class App extends Component {
         { this.state.loading
           ? <div id="loader" className="text-center mt-5"><p>Loading...</p></div>
           : <Main
-              //states&functions
+              captureFile = {this.captureFile}
+              uploadVideo = {this.uploadVideo}
+              currentHash = {this.state.currentHash}
+              currentTitle = {this.state.currentTitle}
             />
         }
       </div>
