@@ -1,3 +1,2 @@
 # SolidityPlayGround
-Learning Solidity 
-Building on the Ethereum Blockchain
+Learning Solidity / Building on the Ethereum Blockchain
