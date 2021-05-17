@@ -120,7 +120,8 @@ class App extends Component {
 
   //Change Video
   changeVideo = (hash, title) => {
-
+    this.setState({'currentHash': hash})
+    this.setState({'currentTitle': title})
   }
 
   constructor(props) {
@@ -130,7 +131,6 @@ class App extends Component {
       account: '',
       dvideo: null,
       videos: [],
-      loading: true,
       currentHash: null,
       curentTitle: null
     }
@@ -151,6 +151,8 @@ class App extends Component {
               uploadVideo = {this.uploadVideo}
               currentHash = {this.state.currentHash}
               currentTitle = {this.state.currentTitle}
+              videos = {this.state.videos}
+              changeVideo = {this.changeVideo}
             />
         }
       </div>
