@@ -68,7 +68,7 @@ class App extends Component {
       })
       this.setState({loading: false})
     } else {
-      window.alert('DVideo contract has deployed to detected network.')
+      window.alert('DVideo contract has not been deployed to detected network.')
     }
       //Assign dvideo contract to a variable
       //Add dvideo to the state
